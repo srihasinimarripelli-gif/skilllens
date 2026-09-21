@@ -9,8 +9,9 @@ import {
   Play,
 } from 'lucide-react';
 import type { SkillVideo } from '../types';
-import { useApp } from '../context/AppContext';
 import { storageService } from '../services/storage';
+import { useTranslation, useLanguage } from '../i18n';
+import { getLocalizedDuration } from '../data/localizedContent';
 
 interface LearningVideoProps {
   video?: SkillVideo | null;
@@ -25,7 +26,8 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
   skillName,
   onWatched,
 }) => {
-  const { language } = useApp();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
   const [isWatched, setIsWatched] = useState<boolean>(() => storageService.isVideoWatched(skillId));
   const [hasError, setHasError] = useState<boolean>(false);
 
@@ -40,15 +42,22 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
     if (onWatched) onWatched();
   };
 
-  // Language awareness message
+  // Language awareness message across all 6 supported languages
   const getLanguageNotice = () => {
-    if (language === 'hi') {
-      return 'English video • हिंदी instructions below';
+    switch (language) {
+      case 'hi':
+        return 'English video • हिंदी instructions below';
+      case 'te':
+        return 'English video • తెలుగు instructions below';
+      case 'kn':
+        return 'English video • ಕನ್ನಡ ವಿವರಣೆಗಳು ಕೆಳಗೆ';
+      case 'ta':
+        return 'English video • தமிழ் வழிமுறைகள் கீழே';
+      case 'ml':
+        return 'English video • മലയാളം നിർദ്ദേശങ്ങൾ താഴെ';
+      default:
+        return 'English instructional video';
     }
-    if (language === 'te') {
-      return 'English video • తెలుగు instructions below';
-    }
-    return 'English instructional video';
   };
 
   const embedUrl = video?.embedUrl || video?.videoUrl;
@@ -78,7 +87,7 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                Instructional Video Lesson
+                {t('video.lessonTitle')}
               </h3>
             </div>
           </div>
@@ -86,17 +95,17 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
             {hasError ? (
               <>
                 <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>Video unavailable</span>
+                <span>{t('video.videoUnavailable')}</span>
               </>
             ) : (
-              <span>Video demonstration</span>
+              <span>{t('video.demonstration')}</span>
             )}
           </span>
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
           {hasError
-            ? 'The video could not be loaded. Please follow the step-by-step visual instructions below.'
+            ? t('video.fallbackMessage')
             : 'Review the step-by-step instructions below before starting your hands-on practice.'}
         </p>
 
@@ -104,9 +113,9 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
           <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
             <Play className="w-5 h-5 fill-current ml-0.5" />
           </div>
-          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">Step-by-Step Curriculum Ready</h4>
+          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('learning.tutorial')}</h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-            Proceed through the step breakdown, equipment checklist, and safety tips below for {skillName}.
+            {skillName}
           </p>
         </div>
       </div>
@@ -123,7 +132,7 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Instructional Video
+              {t('video.lessonTitle')}
             </h3>
           </div>
         </div>
@@ -131,13 +140,13 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
             <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-            <span>{video.duration}</span>
+            <span>{getLocalizedDuration(video.duration)}</span>
           </div>
 
           {isWatched && (
             <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               <Check className="w-3 h-3 stroke-[3]" />
-              <span>Watched</span>
+              <span>{t('video.videoCompleted')}</span>
             </span>
           )}
         </div>
@@ -176,7 +185,7 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium px-2.5 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
           >
-            <span>YouTube</span>
+            <span>{t('video.openInYouTube')}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
 
@@ -186,12 +195,12 @@ export const LearningVideo: React.FC<LearningVideoProps> = ({
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white dark:hover:text-white border border-blue-200 dark:border-blue-800 text-xs font-semibold transition-all cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Mark as Watched</span>
+              <span>{t('video.markAsWatched')}</span>
             </button>
           ) : (
             <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold px-2 py-1">
               <Check className="w-3.5 h-3.5" />
-              <span>Completed</span>
+              <span>{t('video.videoCompleted')}</span>
             </span>
           )}
         </div>

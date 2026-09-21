@@ -1,6 +1,9 @@
+import React from 'react';
 import { Clock, Play } from 'lucide-react';
 import type { Skill } from '../types';
 import { CATEGORIES } from '../data/mockData';
+import { useApp } from '../context/AppContext';
+import { getLocalizedCategory, getLocalizedSkill, getLocalizedDifficulty } from '../data/localizedContent';
 
 interface SkillCardProps {
   skill: Skill;
@@ -15,7 +18,10 @@ export const SkillCard: React.FC<SkillCardProps> = ({
   onClick,
   onPractice,
 }) => {
-  const category = CATEGORIES.find((c) => c.id === skill.categoryId);
+  const { t, language } = useApp();
+  const rawCategory = CATEGORIES.find((c) => c.id === skill.categoryId);
+  const category = rawCategory ? getLocalizedCategory(rawCategory, language) : null;
+  const localizedSkill = getLocalizedSkill(skill, language);
 
   const difficultyBadges = {
     Beginner: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
@@ -32,23 +38,23 @@ export const SkillCard: React.FC<SkillCardProps> = ({
         {/* Category & Badge */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 truncate">
-            {category?.name || 'Craft'}
+            {category?.name || t('common.skills')}
           </span>
           {skill.flagship && (
             <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-md shrink-0">
-              Featured
+              {t('common.featured')}
             </span>
           )}
         </div>
 
         {/* Title */}
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug mb-1.5">
-          {skill.name}
+          {localizedSkill.name}
         </h3>
 
         {/* Description */}
         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
-          {skill.description}
+          {localizedSkill.description}
         </p>
       </div>
 
@@ -57,15 +63,15 @@ export const SkillCard: React.FC<SkillCardProps> = ({
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span
             className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
-              difficultyBadges[skill.difficulty]
+              difficultyBadges[skill.difficulty] || difficultyBadges.Beginner
             }`}
           >
-            {skill.difficulty}
+            {getLocalizedDifficulty(skill.difficulty, language)}
           </span>
           <span className="text-slate-300 dark:text-slate-600">·</span>
           <div className="flex items-center gap-1 text-[11px]">
             <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-            <span>{skill.duration}</span>
+            <span>{localizedSkill.duration}</span>
           </div>
           {bestScore !== undefined && bestScore !== null && (
             <>
@@ -86,11 +92,11 @@ export const SkillCard: React.FC<SkillCardProps> = ({
             className="interactive-btn flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-600 dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white dark:hover:text-white border border-blue-200 dark:border-blue-800 hover:border-blue-600 text-xs font-semibold cursor-pointer"
           >
             <Play className="w-3 h-3 fill-current" />
-            <span>Practice</span>
+            <span>{t('common.practice')}</span>
           </button>
         ) : (
           <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-            Learn →
+            {t('common.learn')} →
           </span>
         )}
       </div>

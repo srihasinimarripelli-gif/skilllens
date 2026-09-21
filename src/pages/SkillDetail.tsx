@@ -15,22 +15,33 @@ import { Button } from '../components/Button';
 import { SKILLS, CATEGORIES } from '../data/mockData';
 import { storageService } from '../services/storage';
 import { PageTransition } from '../components/PageTransition';
+import { useTranslation } from '../i18n';
+import {
+  getLocalizedSkill,
+  getLocalizedCategory,
+  getLocalizedDifficulty,
+  getLocalizedDuration,
+} from '../data/localizedContent';
 
 export const SkillDetail: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const skill = SKILLS.find((s) => s.id === skillId) || SKILLS[0];
   const category = CATEGORIES.find((c) => c.id === skill.categoryId);
   const bestScore = storageService.getBestScoreForSkill(skill.id);
+
+  const locSkill = getLocalizedSkill(skill.id, skill.name, skill.description);
+  const localizedCatName = category ? getLocalizedCategory(category.id, category.name) : t('skillDetail.overview');
 
   return (
     <div className="min-h-screen pb-20 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-250">
       <Header
         showBack
         onBack={() => navigate('/skills')}
-        title={skill.name}
-        subtitle={category?.name || 'Skill Overview'}
+        title={locSkill.name}
+        subtitle={localizedCatName}
       />
 
       <PageTransition className="px-4 sm:px-6 lg:px-8 py-6 max-w-4xl mx-auto w-full flex flex-col gap-6">
@@ -39,26 +50,26 @@ export const SkillDetail: React.FC = () => {
           {/* Top Meta */}
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-              {category?.name}
+              {localizedCatName}
             </span>
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 font-medium text-slate-700 dark:text-slate-300">
-                {skill.difficulty}
+                {getLocalizedDifficulty(skill.difficulty)}
               </span>
               <span className="text-slate-300 dark:text-slate-600">·</span>
               <div className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                <span>{skill.duration}</span>
+                <span>{getLocalizedDuration(skill.duration)}</span>
               </div>
             </div>
           </div>
 
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              {skill.name}
+              {locSkill.name}
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-              {skill.description}
+              {locSkill.description}
             </p>
           </div>
 
@@ -67,9 +78,9 @@ export const SkillDetail: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Personal Record</span>
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">{t('skillDetail.personalBest')}</span>
                 <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {bestScore !== null ? `${bestScore}% Mastery` : 'No practice recorded yet'}
+                  {bestScore !== null ? `${bestScore}% ${t('skillDetail.mastery')}` : t('skillDetail.noScoreYet')}
                 </span>
               </div>
             </div>
@@ -84,12 +95,12 @@ export const SkillDetail: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <Tv className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Instructional Video Available</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Includes real technique breakdown and steps</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('skillDetail.videoAvailable')}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('skillDetail.videoAvailableDesc')}</p>
               </div>
             </div>
             <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-700">
-              {skill.learning.video?.duration || skill.duration}
+              {getLocalizedDuration(skill.learning.video?.duration || skill.duration)}
             </span>
           </div>
 
@@ -102,7 +113,7 @@ export const SkillDetail: React.FC = () => {
               className="w-full sm:flex-1"
             >
               <BookOpen className="w-4 h-4" />
-              <span>Start Learning Lesson</span>
+              <span>{t('skillDetail.learnStepByStep')}</span>
             </Button>
 
             <Button
@@ -112,7 +123,7 @@ export const SkillDetail: React.FC = () => {
               className="w-full sm:flex-1"
             >
               <Play className="w-4 h-4 fill-current" />
-              <span>Practice Form with Camera</span>
+              <span>{t('skillDetail.startPractice')}</span>
             </Button>
           </div>
         </div>
@@ -121,7 +132,7 @@ export const SkillDetail: React.FC = () => {
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-xs flex flex-col gap-3 transition-colors duration-250">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Wrench className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <span>Tools & Equipment Needed</span>
+            <span>{t('skillDetail.toolsNeeded')}</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-200">
             {skill.tools.map((tool, idx) => (
@@ -136,10 +147,10 @@ export const SkillDetail: React.FC = () => {
         {/* Evaluation Benchmarks */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-xs flex flex-col gap-3 transition-colors duration-250">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-            Evaluation Benchmarks
+            {t('skillDetail.observableMetrics')}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            During camera practice, your form will be assessed on these standards:
+            {t('practice.targetMetrics')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             {skill.metrics.map((m) => (
@@ -156,7 +167,7 @@ export const SkillDetail: React.FC = () => {
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-xs flex flex-col gap-2.5 transition-colors duration-250">
             <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
               <ShieldAlert className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              <h2 className="text-sm font-bold">Safety Notes</h2>
+              <h2 className="text-sm font-bold">{t('skillDetail.safetyFirst')}</h2>
             </div>
             <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-300 space-y-1">
               {skill.safetyNotes.map((item, idx) => (

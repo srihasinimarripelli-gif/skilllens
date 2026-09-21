@@ -13,6 +13,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { Category } from '../types';
+import { useApp } from '../context/AppContext';
+import { getLocalizedCategory } from '../data/localizedContent';
 
 interface CategoryCardProps {
   category: Category;
@@ -38,6 +40,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   onClick,
   compact = false,
 }) => {
+  const { t, language } = useApp();
+  const localizedCat = getLocalizedCategory(category, language);
   const IconComponent = iconMap[category.iconName] || Sparkles;
 
   if (compact) {
@@ -50,10 +54,10 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           <IconComponent className="w-5 h-5" />
         </div>
         <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          {category.name}
+          {localizedCat.name}
         </span>
         <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-          {category.skillCount} skills
+          {category.skillCount} {t('common.skills')}
         </span>
       </div>
     );
@@ -72,14 +76,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              {category.name}
+              {localizedCat.name}
             </h3>
             <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0">
-              {category.skillCount} skills
+              {category.skillCount} {t('common.skills')}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-            {category.description}
+            {localizedCat.description}
           </p>
         </div>
       </div>

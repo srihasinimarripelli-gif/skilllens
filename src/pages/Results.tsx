@@ -11,30 +11,37 @@ import { Header } from '../components/Header';
 import { Button } from '../components/Button';
 import { storageService } from '../services/storage';
 import { PageTransition } from '../components/PageTransition';
+import { useTranslation } from '../i18n';
+import { getLocalizedSkill } from '../data/localizedContent';
 
 export const Results: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const session = storageService.getLatestSession();
 
   if (!session) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-250">
-        <Header title="Practice Results" subtitle="No recent session" />
+        <Header title={t('results.sessionSummary')} subtitle={t('results.noSessionFound')} />
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3">
             <Info className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">No Practice Session Found</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
+            {t('results.noSessionFound')}
+          </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mb-6">
-            Complete a practice technique session with your camera to see your evaluation.
+            {t('results.noSessionFoundDesc')}
           </p>
           <Button onClick={() => navigate('/skills')} variant="primary" size="md">
-            <span>Browse Skills</span>
+            <span>{t('results.browseSkills')}</span>
           </Button>
         </main>
       </div>
     );
   }
+
+  const locSkill = getLocalizedSkill(session.skillId, session.skillName, '');
 
   // Improvements / tips
   const improvementFeedback =
@@ -49,8 +56,8 @@ export const Results: React.FC = () => {
   return (
     <div className="min-h-screen pb-20 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-250">
       <Header
-        title="Practice Complete"
-        subtitle={`${session.skillName} · Technique Summary`}
+        title={t('results.practiceComplete')}
+        subtitle={`${locSkill.name} · ${t('results.techniqueSummary')}`}
       />
 
       <PageTransition className="px-4 sm:px-6 lg:px-8 py-8 max-w-3xl mx-auto w-full flex flex-col gap-6">
@@ -59,12 +66,12 @@ export const Results: React.FC = () => {
           {session.hasSufficientEvidence === false ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-semibold mb-4 border border-amber-200 dark:border-amber-800">
               <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Incomplete Observation</span>
+              <span>{t('results.incompleteObservation')}</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-4 border border-emerald-200 dark:border-emerald-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Visual Evidence Recorded</span>
+              <span>{t('results.visualEvidenceRecorded')}</span>
             </div>
           )}
 
@@ -73,28 +80,26 @@ export const Results: React.FC = () => {
               {session.hasSufficientEvidence === false ? '--' : session.score}
             </span>
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-2">
-              Technique Evaluation Score
+              {t('results.formScore')}
             </span>
           </div>
 
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">
             {session.hasSufficientEvidence === false
-              ? 'Not enough visual data to evaluate technique'
+              ? t('results.notEnoughVisualData')
               : session.score >= 80
-              ? 'Consistent technique observed across steps'
-              : 'Practice completed — keep practicing to build rhythm'}
+              ? t('results.consistentTechnique')
+              : t('results.practiceCompletedKeepGoing')}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 justify-center mb-2">
             <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-            <span>Observed for {durationSecs} seconds · Saved to your device</span>
+            <span>{t('results.observedFor', { seconds: durationSecs })}</span>
           </p>
 
           {session.hasSufficientEvidence === false && (
             <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl text-left text-xs text-amber-800 dark:text-amber-300 max-w-lg">
-              <p className="font-semibold mb-1">Why is there no score?</p>
-              <p>
-                SkillLens only evaluates technique when your hands and work area are continuously visible and active during the exercise. Practice for at least 4–5 continuous seconds with your camera pointed at your hands to generate a verified technique score.
-              </p>
+              <p className="font-semibold mb-1">{t('results.whyNoScore')}</p>
+              <p>{t('results.whyNoScoreDesc')}</p>
             </div>
           )}
         </div>
@@ -105,10 +110,10 @@ export const Results: React.FC = () => {
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Camera Evidence Checklist
+                  {t('results.metricsTitle')}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Signals observed by your browser camera during this session
+                  {t('practice.targetMetrics')}
                 </p>
               </div>
             </div>
@@ -126,17 +131,17 @@ export const Results: React.FC = () => {
                   </div>
                   <div className="shrink-0">
                     {!signal.reliable ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600" title="Requires tactile or ultra high-resolution hardware">
-                        Not reliably detected
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                        {t('practice.incompleteObservation')}
                       </span>
                     ) : signal.status === 'detected' ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                        Detected
+                        {t('common.success')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
-                        Not Detected
+                        {t('practice.incompleteObservation')}
                       </span>
                     )}
                   </div>
@@ -149,7 +154,7 @@ export const Results: React.FC = () => {
         {/* Breakdown of Results */}
         <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xs flex flex-col gap-4 transition-colors duration-250">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-3">
-            Metric Observations:
+            {t('results.metricsTitle')}:
           </h3>
 
           <div className="flex flex-col gap-4">
@@ -180,7 +185,7 @@ export const Results: React.FC = () => {
         {improvementFeedback.length > 0 && (
           <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xs flex flex-col gap-3 transition-colors duration-250">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Coaching Recommendations
+              {t('results.improvementsTitle')}
             </h3>
             <ul className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
               {improvementFeedback.map((tip, idx) => (
@@ -202,7 +207,7 @@ export const Results: React.FC = () => {
             className="w-full sm:w-auto px-6"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Practice Again</span>
+            <span>{t('results.practiceAgain')}</span>
           </Button>
 
           <Button
@@ -211,7 +216,7 @@ export const Results: React.FC = () => {
             size="lg"
             className="w-full sm:w-auto px-6"
           >
-            <span>Continue Learning</span>
+            <span>{t('common.continueLearning')}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>

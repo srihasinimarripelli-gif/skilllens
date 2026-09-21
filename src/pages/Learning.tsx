@@ -16,13 +16,23 @@ import { LearningVideo } from '../components/LearningVideo';
 import { SKILLS, CATEGORIES } from '../data/mockData';
 import { storageService } from '../services/storage';
 import { PageTransition } from '../components/PageTransition';
+import { useTranslation } from '../i18n';
+import {
+  getLocalizedSkill,
+  getLocalizedCategory,
+  getLocalizedDifficulty,
+  getLocalizedDuration,
+} from '../data/localizedContent';
 
 export const Learning: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const skill = SKILLS.find((s) => s.id === skillId) || SKILLS[0];
   const category = CATEGORIES.find((c) => c.id === skill.categoryId);
+  const locSkill = getLocalizedSkill(skill.id, skill.name, skill.description);
+  const localizedCatName = category ? getLocalizedCategory(category.id, category.name) : t('learning.tutorial');
 
   // Active step in the step-by-step tutorial (0-indexed)
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
@@ -57,8 +67,8 @@ export const Learning: React.FC = () => {
       <Header
         showBack
         onBack={() => navigate(`/skills/${skill.id}`)}
-        title={skill.name}
-        subtitle={`${category?.name || 'Craft'} · Lesson`}
+        title={locSkill.name}
+        subtitle={`${localizedCatName} · ${t('learning.lesson')}`}
       />
 
       <PageTransition className="px-4 sm:px-6 lg:px-8 py-6 max-w-4xl mx-auto w-full flex flex-col gap-6">
@@ -67,21 +77,21 @@ export const Learning: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
             <div>
               <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 block mb-1">
-                {category?.name || 'Skill Tutorial'}
+                {localizedCatName}
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                {skill.name}
+                {locSkill.name}
               </h1>
             </div>
 
             <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
               <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 font-medium text-slate-700 dark:text-slate-300">
-                {skill.difficulty}
+                {getLocalizedDifficulty(skill.difficulty)}
               </span>
               <span className="text-slate-300 dark:text-slate-600">·</span>
               <div className="flex items-center gap-1 font-medium">
                 <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                <span>{skill.duration}</span>
+                <span>{getLocalizedDuration(skill.duration)}</span>
               </div>
             </div>
           </div>
@@ -89,7 +99,7 @@ export const Learning: React.FC = () => {
           {/* Simple Blue Progress Bar */}
           <div className="flex flex-col gap-1.5 mt-4">
             <div className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span>Progress: Step {activeStepIndex + 1} of {totalSteps}</span>
+              <span>{t('learning.stepProgress', { current: activeStepIndex + 1, total: totalSteps })}</span>
               <span className="text-blue-600 dark:text-blue-400 font-bold">{progressPercent}%</span>
             </div>
             <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -105,7 +115,7 @@ export const Learning: React.FC = () => {
         <LearningVideo
           video={learning.video}
           skillId={skill.id}
-          skillName={skill.name}
+          skillName={locSkill.name}
         />
 
         {/* STEP DETAILS CARD */}
@@ -113,7 +123,7 @@ export const Learning: React.FC = () => {
           {/* Step Header */}
           <div>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-2">
-              <span>Step {activeStepIndex + 1}</span>
+              <span>{t('learning.step', { current: activeStepIndex + 1 })}</span>
             </div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
               {currentStep.title}
@@ -130,7 +140,7 @@ export const Learning: React.FC = () => {
                 i
               </div>
               <div>
-                <strong className="font-semibold block mb-0.5">Technique Note</strong>
+                <strong className="font-semibold block mb-0.5">{t('learning.techniqueNote')}</strong>
                 <p className="text-blue-800 dark:text-blue-300/90 leading-relaxed">{currentStep.coachTip}</p>
               </div>
             </div>
@@ -141,13 +151,13 @@ export const Learning: React.FC = () => {
             <div className="border-t border-slate-100 dark:border-slate-700 pt-5">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-1.5">
                 <Wrench className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                <span>What you need</span>
+                <span>{t('learning.whatYouNeed')}</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-200">
-                {skill.tools.map((t, idx) => (
+                {skill.tools.map((item, idx) => (
                   <div key={`tool-${idx}`} className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-750/50 border border-slate-200/80 dark:border-slate-700">
                     <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 stroke-[2.5]" />
-                    <span>{t}</span>
+                    <span>{item}</span>
                   </div>
                 ))}
                 {learning.materials?.map((m, idx) => (
@@ -165,7 +175,7 @@ export const Learning: React.FC = () => {
             <div className="border-t border-slate-100 dark:border-slate-700 pt-5">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-amber-500" />
-                <span>Common mistakes to avoid</span>
+                <span>{t('learning.commonMistakes')}</span>
               </h3>
               <div className="flex flex-col gap-2">
                 {learning.commonMistakes.map((item, idx) => (
@@ -187,7 +197,7 @@ export const Learning: React.FC = () => {
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-2 text-slate-900 dark:text-slate-100">
                   <ShieldAlert className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                  <h4 className="text-xs font-bold uppercase tracking-wider">Safety & Workspace</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider">{t('learning.safetyAndWorkspace')}</h4>
                 </div>
                 <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-300 space-y-1 pl-1">
                   {(learning.safety || skill.safetyNotes).map((item, idx) => (
@@ -208,7 +218,7 @@ export const Learning: React.FC = () => {
               className="w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Previous Step</span>
+              <span>{t('learning.previousStep')}</span>
             </Button>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -219,7 +229,7 @@ export const Learning: React.FC = () => {
                   size="md"
                   className="w-full sm:w-auto"
                 >
-                  <span>Next Step</span>
+                  <span>{t('learning.nextStep')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               ) : (
@@ -233,7 +243,7 @@ export const Learning: React.FC = () => {
                   className="w-full sm:w-auto"
                 >
                   <Play className="w-4 h-4 fill-current" />
-                  <span>Start Practice</span>
+                  <span>{t('learning.startPractice')}</span>
                 </Button>
               )}
             </div>
@@ -243,8 +253,8 @@ export const Learning: React.FC = () => {
         {/* Quick jump to interactive practice session */}
         <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left transition-colors duration-250">
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">Ready to test your technique?</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">Use your camera for real-time form checks and feedback.</p>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('learning.readyToTest')}</h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{t('learning.readyToTestDesc')}</p>
           </div>
           <Button
             onClick={() => navigate(`/practice/${skill.id}`)}
@@ -253,7 +263,7 @@ export const Learning: React.FC = () => {
             className="shrink-0"
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>Open Practice Studio</span>
+            <span>{t('learning.openStudio')}</span>
           </Button>
         </div>
       </PageTransition>

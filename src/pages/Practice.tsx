@@ -24,6 +24,8 @@ import { storageService } from '../services/storage';
 import { PageTransition } from '../components/PageTransition';
 import { getSkillPracticeRules } from '../services/practiceRules';
 import { VisionEngine } from '../services/visionEngine';
+import { useTranslation, useLanguage } from '../i18n';
+import { getLocalizedSkill, getLocalizedCategory } from '../data/localizedContent';
 import type {
   PracticeState,
   SkillPracticeRule,
@@ -36,9 +38,13 @@ import type {
 export const Practice: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
 
   const skill = SKILLS.find((s) => s.id === skillId) || SKILLS[0];
   const category = CATEGORIES.find((c) => c.id === skill.categoryId);
+  const locSkill = getLocalizedSkill(skill.id, skill.name, skill.description, language);
+  const localizedCatName = category ? getLocalizedCategory(category.id, category.name, language) : t('nav.practice');
 
   // Skill-specific rules
   const rules: SkillPracticeRule = getSkillPracticeRules(skill);
@@ -319,13 +325,30 @@ export const Practice: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${remainder.toString().padStart(2, '0')}`;
   };
 
+  const localizeCoachMessage = (msg: string): string => {
+    if (!msg) return msg;
+    if (msg.includes('Lighting is too dark')) return t('feedback.tooDark');
+    if (msg.includes('Keep both hands inside')) return t('feedback.keepHandsInFrame');
+    if (msg.includes('Move the camera closer')) return t('feedback.adjustCameraSubject');
+    if (msg.includes('Adjust the camera so your')) return t('feedback.adjustCameraSubject');
+    if (msg.includes('Hands and hair are in frame')) return t('feedback.braidHandMovement');
+    if (msg.includes('Workspace is ready')) return t('feedback.workspaceReady');
+    if (msg.includes('Keep braiding for a few more seconds')) return t('feedback.braidMoreSeconds');
+    if (msg.includes('Keep practicing for a few more seconds')) return t('feedback.keepPracticingAWhile');
+    if (msg.includes('alternating crossing pattern')) return t('feedback.braidAlternating');
+    if (msg.includes('steady tension across the three strands')) return t('feedback.braidSteadyTension');
+    if (msg.includes('Observing steady technique movement') || msg.includes('hand movement appears consistent')) return t('feedback.handMovementConsistent');
+    if (msg.includes('Observing your technique')) return t('feedback.observingTechnique');
+    return msg;
+  };
+
   // State status pills
   const renderStateBadge = () => {
     if (cameraState === 'simulated') {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Demo Simulation Mode</span>
+          <span>{t('practice.simulatedBadge')}</span>
         </span>
       );
     }
@@ -335,21 +358,21 @@ export const Practice: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <AlertCircle className="w-3.5 h-3.5" />
-            <span>Poor Framing</span>
+            <span>{t('practice.keepHandsInFrame')}</span>
           </span>
         );
       case 'NO_SUBJECT':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
             <EyeOff className="w-3.5 h-3.5" />
-            <span>Subject Not Visible</span>
+            <span>{t('practice.adjustCameraSubject')}</span>
           </span>
         );
       case 'READY_TO_PRACTICE':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
             <Check className="w-3.5 h-3.5" />
-            <span>Ready to Practice</span>
+            <span>{t('practice.liveTechniqueGuidance')}</span>
           </span>
         );
       case 'OBSERVING':
@@ -357,20 +380,20 @@ export const Practice: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
             <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
-            <span>Observing Technique...</span>
+            <span>{t('practice.trackingActive')}</span>
           </span>
         );
       case 'VALID_OBSERVATION':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
             <CheckCircle className="w-3.5 h-3.5" />
-            <span>Valid Observation</span>
+            <span>{t('practice.sufficientEvidence')}</span>
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            <span>Camera Connected</span>
+            <span>{t('practice.trackingActive')}</span>
           </span>
         );
     }
@@ -381,8 +404,8 @@ export const Practice: React.FC = () => {
       <Header
         showBack
         onBack={() => navigate(`/skills/${skill.id}`)}
-        title={skill.name}
-        subtitle={`${category?.name || 'Craft'} · Real Practice Studio`}
+        title={locSkill.name}
+        subtitle={`${localizedCatName} · ${t('practice.liveTechniqueGuidance')}`}
       />
 
       <PageTransition className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 flex flex-col gap-5">
@@ -449,11 +472,11 @@ export const Practice: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-base font-bold text-white mb-1.5">
-                      Camera Access Needed for Practice
+                      {t('practice.cameraAccessDenied')}
                     </h4>
                     <p className="text-xs text-slate-300 leading-relaxed max-w-sm">
                       {cameraError ||
-                        'Visual observation requires access to your camera to detect hand movements.'}
+                        t('practice.grantCameraPrompt')}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2.5 w-full mt-2">
@@ -464,7 +487,7 @@ export const Practice: React.FC = () => {
                       className="flex-1"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
-                      <span>Retry Camera Permission</span>
+                      <span>{t('practice.retryCamera')}</span>
                     </Button>
                     <Button
                       onClick={() => {
@@ -475,7 +498,7 @@ export const Practice: React.FC = () => {
                       size="sm"
                       className="flex-1 bg-slate-700 text-white border-slate-600 hover:bg-slate-600"
                     >
-                      <span>Use Demo Simulation</span>
+                      <span>{t('practice.useSimulatedCamera')}</span>
                     </Button>
                   </div>
                 </div>
@@ -485,10 +508,10 @@ export const Practice: React.FC = () => {
                     <Camera className="w-6 h-6 text-blue-400" />
                   </div>
                   <h4 className="text-sm font-bold text-white mb-1">
-                    Connecting to your camera...
+                    {t('practice.connectingCamera')}
                   </h4>
                   <p className="text-xs text-slate-400">
-                    Please approve camera permissions when prompted by your browser.
+                    {t('practice.grantCameraPrompt')}
                   </p>
                 </div>
               )}
@@ -533,10 +556,10 @@ export const Practice: React.FC = () => {
           <div className="md:col-span-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex flex-col gap-3.5 transition-colors duration-250">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2.5">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                Visual Evidence Checklist
+                {t('practice.targetMetrics')}
               </h2>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Camera observation
+                {t('practice.trackingActive')}
               </span>
             </div>
 
@@ -550,7 +573,7 @@ export const Practice: React.FC = () => {
                     >
                       <span className="font-medium">{sig.label}</span>
                       <span className="text-[11px] italic font-normal text-slate-400 dark:text-slate-500">
-                        Not reliably detected
+                        {t('practice.incompleteObservation')}
                       </span>
                     </div>
                   );
@@ -599,7 +622,7 @@ export const Practice: React.FC = () => {
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
               <span>
-                Minimum observation window: {rules.minimumObservationSeconds}s of continuous movement.
+                {rules.minimumObservationSeconds}s {t('common.seconds')} min.
               </span>
             </div>
           </div>
@@ -611,24 +634,24 @@ export const Practice: React.FC = () => {
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2.5">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                   <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>Coach Observation</span>
+                  <span>{t('practice.coachNotes')}</span>
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">Live Guidance</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">{t('practice.liveTechniqueGuidance')}</span>
               </div>
 
               <div className="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 flex flex-col gap-1">
                 <span className="text-[11px] font-semibold text-blue-900 dark:text-blue-200 uppercase tracking-wide">
-                  Visual Cue
+                  {t('practice.coachNotes')}
                 </span>
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-200 leading-relaxed">
-                  {coachMessage}
+                  {localizeCoachMessage(coachMessage)}
                 </p>
               </div>
 
               {/* Verified Tools & Materials for this Skill */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-xs">
                 <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Required for this skill:
+                  {t('skillDetail.toolsNeeded')}:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {rules.requiredMaterials.concat(rules.requiredTools).map((item, idx) => (
@@ -641,7 +664,7 @@ export const Practice: React.FC = () => {
                   ))}
                   {rules.requiredTools.length === 0 && rules.requiredMaterials.length <= 1 && (
                     <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
-                      Hands only (no tools required)
+                      Hands only
                     </span>
                   )}
                 </div>
@@ -652,7 +675,7 @@ export const Practice: React.FC = () => {
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4 transition-colors duration-250">
               <div>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
-                  Technique Score
+                  {t('results.techniqueScore')}
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
@@ -662,19 +685,19 @@ export const Practice: React.FC = () => {
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     {bufferSummary?.hasSufficientData
-                      ? 'Based on observed cadence'
-                      : 'Accumulating observation...'}
+                      ? t('results.visualEvidenceRecorded')
+                      : t('practice.trackingActive')}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Valid motion observed: {bufferSummary?.validObservationSeconds || 0}s / {rules.minimumObservationSeconds}s min
+                  {bufferSummary?.validObservationSeconds || 0}s / {rules.minimumObservationSeconds}s min
                 </p>
               </div>
 
               <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center p-1 shrink-0">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-none">Cadence</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-none">Status</span>
                 <span className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">
-                  {currentObservation?.alternatingMotion ? 'Rhythmic' : currentObservation?.motionDetected ? 'Active' : 'Idle'}
+                  {currentObservation?.alternatingMotion ? 'Active' : currentObservation?.motionDetected ? 'Steady' : 'Ready'}
                 </span>
               </div>
             </div>
@@ -685,8 +708,8 @@ export const Practice: React.FC = () => {
         <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 transition-colors duration-250">
           <div className="text-xs text-slate-600 dark:text-slate-400 text-center sm:text-left">
             {isActive
-              ? 'Perform the step actions with steady movement, then click "Complete Practice".'
-              : 'Frame your hands in front of the camera and click "Start Practice".'}
+              ? t('practice.liveTechniqueGuidance')
+              : t('practice.keepHandsInFrame')}
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -698,7 +721,7 @@ export const Practice: React.FC = () => {
                 className="w-full sm:w-auto px-6"
               >
                 <Play className="w-4 h-4 fill-current" />
-                <span>Start Practice</span>
+                <span>{t('common.startPractice')}</span>
               </Button>
             ) : (
               <>
@@ -711,12 +734,12 @@ export const Practice: React.FC = () => {
                   {isPaused ? (
                     <>
                       <Play className="w-4 h-4 fill-current text-blue-600 dark:text-blue-400" />
-                      <span>Resume</span>
+                      <span>{t('practice.resume')}</span>
                     </>
                   ) : (
                     <>
                       <Pause className="w-4 h-4" />
-                      <span>Pause</span>
+                      <span>{t('practice.pause')}</span>
                     </>
                   )}
                 </Button>
@@ -728,7 +751,7 @@ export const Practice: React.FC = () => {
                   className="flex-1 sm:flex-none px-6"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  <span>Complete Practice</span>
+                  <span>{t('practice.finishSession')}</span>
                 </Button>
               </>
             )}

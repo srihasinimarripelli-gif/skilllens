@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Compass, Camera, Sparkles, CheckCircle2, ArrowRight, ArrowLeft, BookOpen } from 'lucide-react';
 import { Button } from '../components/Button';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { LanguageSelector } from '../components/LanguageSelector';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { CATEGORIES } from '../data/mockData';
+import { getLocalizedCategory } from '../data/localizedContent';
 
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { t } = useApp();
+  const { t, language } = useApp();
   const { currentUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -20,37 +22,40 @@ export const Onboarding: React.FC = () => {
     {
       icon: Compass,
       title: userFirstName
-        ? `Welcome to SkillLens, ${userFirstName}!`
-        : t.onboarding.step1Title,
+        ? `${t('onboarding.step1Title')}, ${userFirstName}`
+        : t('onboarding.step1Title'),
       description: userInterests.length > 0
-        ? `We've personalized your learning paths for: ${userInterests
-            .map((id) => CATEGORIES.find((c) => c.id === id)?.name.split(' ')[0])
+        ? `${t('onboarding.step1Desc')} (${userInterests
+            .map((id) => {
+              const cat = CATEGORIES.find((c) => c.id === id);
+              return cat ? getLocalizedCategory(cat, language).name : '';
+            })
             .filter(Boolean)
-            .join(', ')}.`
-        : t.onboarding.step1Desc,
-      tag: '67 Hands-on Skills',
+            .join(', ')})`
+        : t('onboarding.step1Desc'),
+      tag: t('common.skills'),
       preview: (
         <div className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-900 dark:text-slate-100">
-            <span className="text-blue-600 dark:text-blue-400 font-bold">Personalized for You</span>
-            <span className="text-slate-500 dark:text-slate-400">10 Categories</span>
+            <span className="text-blue-600 dark:text-blue-400 font-bold">{t('home.exploreCategories')}</span>
+            <span className="text-slate-500 dark:text-slate-400">10 {t('progress.categoriesProgress')}</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-left text-xs text-slate-700 dark:text-slate-200">
             <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
               <span>🎨</span>
-              <span className="font-medium">Roller Painting</span>
+              <span className="font-medium">{t('skillsData.skill-roller-painting.name')}</span>
             </div>
             <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
               <span>🧵</span>
-              <span className="font-medium">Straight Stitching</span>
+              <span className="font-medium">{t('skillsData.skill-straight-stitching.name')}</span>
             </div>
             <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
               <span>💅</span>
-              <span className="font-medium">Nail Polish</span>
+              <span className="font-medium">{t('skillsData.skill-nail-polish-application.name')}</span>
             </div>
             <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
               <span>🧶</span>
-              <span className="font-medium">Crochet Basics</span>
+              <span className="font-medium">{t('skillsData.skill-crochet-chain.name')}</span>
             </div>
           </div>
         </div>
@@ -58,9 +63,9 @@ export const Onboarding: React.FC = () => {
     },
     {
       icon: Camera,
-      title: t.onboarding.step2Title,
-      description: t.onboarding.step2Desc,
-      tag: 'Workspace Setup',
+      title: t('onboarding.step2Title'),
+      description: t('onboarding.step2Desc'),
+      tag: t('practice.cameraTips'),
       preview: (
         <div className="w-full p-5 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200 dark:border-slate-700 flex flex-col items-center text-center">
           <div className="w-full h-28 rounded-lg bg-white dark:bg-slate-800 border-2 border-dashed border-blue-200 dark:border-blue-800 flex flex-col items-center justify-center p-3">
@@ -68,10 +73,10 @@ export const Onboarding: React.FC = () => {
               <Camera className="w-5 h-5" />
             </div>
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-              Position your hands inside the frame
+              {t('practice.keepHandsInFrame')}
             </p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Recommended distance: 30-45 cm
+              {t('skillDetail.cameraTips')}
             </p>
           </div>
         </div>
@@ -79,24 +84,24 @@ export const Onboarding: React.FC = () => {
     },
     {
       icon: Sparkles,
-      title: t.onboarding.step3Title,
-      description: t.onboarding.step3Desc,
-      tag: 'Practical Coaching',
+      title: t('onboarding.step3Title'),
+      description: t('onboarding.step3Desc'),
+      tag: t('home.latestInsights'),
       preview: (
         <div className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 text-left">
           <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-slate-100">
-            <span>Coaching Observations</span>
+            <span>{t('home.recentFeedback')}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-semibold">
-              Real-Time
+              Live
             </span>
           </div>
           <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>"Consistent pace • Tool angle steady at 45°"</span>
+            <span>"{t('feedback.steadyCadence')}"</span>
           </div>
           <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
             <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
-            <span>"Try applying slightly lighter, even pressure"</span>
+            <span>"{t('feedback.moveSlower')}"</span>
           </div>
         </div>
       ),
@@ -122,8 +127,9 @@ export const Onboarding: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 sm:px-6 py-10 relative transition-colors duration-250">
-      {/* Top right theme toggle */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+      {/* Top right language & theme toggles */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+        <LanguageSelector />
         <ThemeToggle />
       </div>
 
@@ -163,7 +169,7 @@ export const Onboarding: React.FC = () => {
             </div>
 
             <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
-              Step {currentStep + 1} of {steps.length} · {step.tag}
+              {t('learning.stepProgress', { current: currentStep + 1, total: steps.length })} · {step.tag}
             </span>
 
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-2">
@@ -183,19 +189,19 @@ export const Onboarding: React.FC = () => {
             {currentStep > 0 ? (
               <Button onClick={handleBack} variant="outline" size="md">
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span>{t('onboarding.back')}</span>
               </Button>
             ) : (
               <button
                 onClick={() => navigate('/home')}
                 className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer px-3 py-2"
               >
-                Skip Intro
+                {t('onboarding.skip')}
               </button>
             )}
 
             <Button onClick={handleNext} variant="primary" size="md" className="px-6">
-              <span>{currentStep === steps.length - 1 ? 'Go to Home' : 'Continue'}</span>
+              <span>{currentStep === steps.length - 1 ? t('onboarding.finish') : t('onboarding.next')}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>

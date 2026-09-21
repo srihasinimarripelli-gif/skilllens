@@ -12,32 +12,32 @@ export const BottomNavigation: React.FC = () => {
 
   const navItems = [
     {
-      label: t.nav.home,
+      label: t('nav.home'),
       path: '/home',
       icon: Home,
       isActive: currentPath === '/home',
     },
     {
-      label: t.nav.skills,
+      label: t('nav.skills'),
       path: '/skills',
       icon: Compass,
       isActive: currentPath.startsWith('/skills') && !currentPath.includes('/learn'),
     },
     {
-      label: t.nav.practice,
+      label: t('nav.practice'),
       path: '/practice/skill-roller-painting',
       icon: Video,
       isActive: currentPath.startsWith('/practice'),
       isCenter: true,
     },
     {
-      label: t.nav.progress,
+      label: t('nav.progress'),
       path: '/progress',
       icon: BarChart2,
       isActive: currentPath === '/progress' || currentPath === '/results',
     },
     {
-      label: t.nav.profile,
+      label: t('nav.profile'),
       path: '/profile',
       icon: User,
       isActive: currentPath === '/profile',

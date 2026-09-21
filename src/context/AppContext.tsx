@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import type { UserProfile, Language, PracticeSession } from '../types';
-import { translations, type TranslationDict } from '../i18n/translations';
+import { createTranslator } from '../i18n';
+import type { TranslateFunction } from '../i18n/types';
+import { STORAGE_LANGUAGE_KEY } from '../i18n/types';
 import { storageService } from '../services/storage';
 
 interface AppContextType {
   profile: UserProfile;
-  t: TranslationDict;
+  t: TranslateFunction & Record<string, any>;
   language: Language;
   setLanguage: (lang: Language) => void;
   updateProfile: (profile: UserProfile) => void;
@@ -20,54 +22,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [profile, setProfile] = useState<UserProfile>(() => storageService.getProfile());
   const [sessions, setSessions] = useState<PracticeSession[]>(() => storageService.getSessions());
 
-  useEffect(() => {
-    // Sync language from profile
-    if (profile.language) {
-      storageService.saveProfile(profile);
+  // Determine active language from localStorage key 'skilllens_language', then profile, then 'en'
+  const [currentLang, setCurrentLang] = useState<Language>(() => {
+    try {
+      const storedLang = localStorage.getItem(STORAGE_LANGUAGE_KEY) as Language;
+      if (storedLang && ['en', 'hi', 'te', 'kn', 'ta', 'ml'].includes(storedLang)) {
+        return storedLang;
+      }
+    } catch {
+      // ignore localStorage errors
     }
-  }, [profile]);
+    const profile = storageService.getProfile();
+    return (profile?.language as Language) || 'en';
+  });
 
-  const setLanguage = (lang: Language) => {
-    const updated = { ...profile, language: lang };
+  // Ensure storage is synced on mount
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_LANGUAGE_KEY, currentLang);
+    } catch (e) {
+      console.error('Failed to sync language key', e);
+    }
+  }, [currentLang]);
+
+  const setLanguage = useCallback((lang: Language) => {
+    try {
+      localStorage.setItem(STORAGE_LANGUAGE_KEY, lang);
+    } catch (e) {
+      console.error('Failed to save language to localStorage', e);
+    }
+    setCurrentLang(lang);
+    setProfile((prev) => {
+      const updated = { ...prev, language: lang };
+      storageService.saveProfile(updated);
+      return updated;
+    });
+  }, []);
+
+  const updateProfile = useCallback((updated: UserProfile) => {
     setProfile(updated);
     storageService.saveProfile(updated);
-  };
+  }, []);
 
-  const updateProfile = (updated: UserProfile) => {
-    setProfile(updated);
-    storageService.saveProfile(updated);
-  };
-
-  const refreshSessions = () => {
+  const refreshSessions = useCallback(() => {
     setSessions(storageService.getSessions());
     setProfile(storageService.getProfile());
-  };
+  }, []);
 
-  const resetData = () => {
+  const resetData = useCallback(() => {
     storageService.resetAllData();
     setProfile(storageService.getProfile());
     setSessions(storageService.getSessions());
-  };
+  }, []);
 
-  const currentLang = profile.language || 'en';
-  const t = translations[currentLang] || translations.en;
+  // Memoized translation helper
+  const t = useMemo(() => createTranslator(currentLang), [currentLang]);
 
-  return (
-    <AppContext.Provider
-      value={{
-        profile,
-        t,
-        language: currentLang,
-        setLanguage,
-        updateProfile,
-        sessions,
-        refreshSessions,
-        resetData,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+  const contextValue = useMemo<AppContextType>(
+    () => ({
+      profile,
+      t,
+      language: currentLang,
+      setLanguage,
+      updateProfile,
+      sessions,
+      refreshSessions,
+      resetData,
+    }),
+    [profile, t, currentLang, setLanguage, updateProfile, sessions, refreshSessions, resetData]
   );
+
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

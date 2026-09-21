@@ -6,13 +6,14 @@ import { useApp } from '../context/AppContext';
 import { PasswordInput } from '../components/PasswordInput';
 import { Button } from '../components/Button';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { LanguageSelector } from '../components/LanguageSelector';
 import { LoginSuccessAnimation } from '../components/LoginSuccessAnimation';
 
 export const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, isLoading } = useAuth();
-  const { refreshSessions } = useApp();
+  const { refreshSessions, t } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,11 +29,11 @@ export const SignIn: React.FC = () => {
     setErrorMessage(null);
 
     if (!email.trim()) {
-      setErrorMessage('Please enter your email.');
+      setErrorMessage(t('auth.invalidEmail'));
       return;
     }
     if (!password) {
-      setErrorMessage('Please enter your password.');
+      setErrorMessage(t('auth.passwordRequired'));
       return;
     }
 
@@ -42,7 +43,7 @@ export const SignIn: React.FC = () => {
       setAuthedName(result.user.name);
       setShowSuccessAnim(true);
     } else {
-      setErrorMessage(result.error || 'Email or password is incorrect.');
+      setErrorMessage(t('auth.loginFailed'));
     }
   };
 
@@ -54,8 +55,9 @@ export const SignIn: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 sm:px-6 py-10 relative transition-colors duration-250">
-      {/* Top right theme toggle */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+      {/* Top right language & theme toggles */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+        <LanguageSelector />
         <ThemeToggle />
       </div>
 
@@ -85,10 +87,10 @@ export const SignIn: React.FC = () => {
         <div className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xs transition-colors duration-250">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Welcome back
+              {t('auth.welcomeBack')}
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Continue learning and improving your skills.
+              {t('auth.signInSubtitle')}
             </p>
           </div>
 
@@ -101,7 +103,9 @@ export const SignIn: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email Input */}
             <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('auth.email')}
+              </label>
               <div className="relative flex items-center">
                 <div className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none flex items-center">
                   <Mail className="w-4 h-4" />
@@ -110,7 +114,7 @@ export const SignIn: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alex@skilllens.ai"
+                  placeholder={t('auth.emailPlaceholder')}
                   required
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-850 border border-slate-300 dark:border-slate-600 focus:border-blue-600 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors shadow-xs"
                 />
@@ -120,10 +124,10 @@ export const SignIn: React.FC = () => {
             {/* Password Input */}
             <div>
               <PasswordInput
-                label="Password"
+                label={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t('auth.passwordPlaceholder')}
                 required
               />
               <div className="flex justify-end mt-1.5">
@@ -131,7 +135,7 @@ export const SignIn: React.FC = () => {
                   to="/forgot-password"
                   className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                 >
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
             </div>
@@ -145,32 +149,32 @@ export const SignIn: React.FC = () => {
               disabled={isLoading}
               className="mt-2"
             >
-              <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
+              <span>{isLoading ? t('common.loading') : t('auth.signIn')}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
 
           {/* Quick Demo Credentials helper */}
           <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>Try sample learner account:</span>
+            <span>{t('auth.quickDemo')}</span>
             <button
               type="button"
               onClick={handleQuickDemo}
               className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline cursor-pointer"
             >
-              Fill Demo Login
+              Demo
             </button>
           </div>
         </div>
 
         {/* Bottom Signup Link */}
         <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
-          Don't have an account yet?{' '}
+          {t('auth.dontHaveAccount')}{' '}
           <Link
             to="/signup"
             className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
           >
-            Create an account
+            {t('auth.createAccount')}
           </Link>
         </p>
       </div>

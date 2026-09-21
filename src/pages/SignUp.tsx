@@ -6,13 +6,15 @@ import { useApp } from '../context/AppContext';
 import { PasswordInput } from '../components/PasswordInput';
 import { Button } from '../components/Button';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { LanguageSelector } from '../components/LanguageSelector';
 import { CATEGORIES } from '../data/mockData';
+import { getLocalizedCategory } from '../data/localizedContent';
 import { LoginSuccessAnimation } from '../components/LoginSuccessAnimation';
 
 export const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const { signUp, isLoading } = useAuth();
-  const { refreshSessions } = useApp();
+  const { refreshSessions, t, language } = useApp();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,23 +37,23 @@ export const SignUp: React.FC = () => {
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setErrorMessage('Please enter your full name.');
+      setErrorMessage(t('auth.fillAllFields'));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim() || !emailRegex.test(email.trim())) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage(t('auth.invalidEmail'));
       return;
     }
 
     if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
+      setErrorMessage(t('auth.passwordMinLength'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+      setErrorMessage(t('auth.passwordMismatch'));
       return;
     }
 
@@ -67,14 +69,15 @@ export const SignUp: React.FC = () => {
       setCreatedUserName(result.user.name);
       setShowSuccessAnim(true);
     } else {
-      setErrorMessage(result.error || 'Failed to create account.');
+      setErrorMessage(result.error || t('auth.registerFailed'));
     }
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 sm:px-6 py-10 relative transition-colors duration-250">
-      {/* Top right theme toggle */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+      {/* Top right language & theme toggles */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+        <LanguageSelector />
         <ThemeToggle />
       </div>
 
@@ -104,10 +107,10 @@ export const SignUp: React.FC = () => {
         <div className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xs transition-colors duration-250">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Create your account
+              {t('auth.createAccount')}
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Start learning practical hands-on skills today.
+              {t('auth.createAccountSubtitle')}
             </p>
           </div>
 
@@ -120,7 +123,9 @@ export const SignUp: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Full Name */}
             <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Full Name</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('auth.fullName')}
+              </label>
               <div className="relative flex items-center">
                 <div className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none flex items-center">
                   <UserIcon className="w-4 h-4" />
@@ -129,7 +134,7 @@ export const SignUp: React.FC = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Alex Morgan"
+                  placeholder={t('auth.fullNamePlaceholder')}
                   required
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-850 border border-slate-300 dark:border-slate-600 focus:border-blue-600 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors shadow-xs"
                 />
@@ -138,7 +143,9 @@ export const SignUp: React.FC = () => {
 
             {/* Email Address */}
             <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('auth.email')}
+              </label>
               <div className="relative flex items-center">
                 <div className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none flex items-center">
                   <Mail className="w-4 h-4" />
@@ -147,7 +154,7 @@ export const SignUp: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alex@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   required
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-850 border border-slate-300 dark:border-slate-600 focus:border-blue-600 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors shadow-xs"
                 />
@@ -157,17 +164,17 @@ export const SignUp: React.FC = () => {
             {/* Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <PasswordInput
-                label="Password"
+                label={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder={t('auth.passwordPlaceholder')}
                 required
               />
               <PasswordInput
-                label="Confirm Password"
+                label={t('auth.confirmPassword')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat password"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
                 required
               />
             </div>
@@ -175,10 +182,11 @@ export const SignUp: React.FC = () => {
             {/* Interests Selector */}
             <div className="flex flex-col gap-2 text-left pt-1">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Craft Interests (Select at least 1)
+                {t('home.exploreCategories')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {CATEGORIES.slice(0, 6).map((cat) => {
+                  const localizedCat = getLocalizedCategory(cat, language);
                   const isSelected = selectedInterests.includes(cat.id);
                   return (
                     <button
@@ -191,7 +199,7 @@ export const SignUp: React.FC = () => {
                           : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                       }`}
                     >
-                      <span className="truncate">{cat.name}</span>
+                      <span className="truncate">{localizedCat.name}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 ml-1" />}
                     </button>
                   );
@@ -208,7 +216,7 @@ export const SignUp: React.FC = () => {
               disabled={isLoading}
               className="mt-2"
             >
-              <span>{isLoading ? 'Creating Account...' : 'Create Account'}</span>
+              <span>{isLoading ? t('common.loading') : t('auth.createAccount')}</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
@@ -216,12 +224,12 @@ export const SignUp: React.FC = () => {
 
         {/* Bottom Sign In Link */}
         <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link
             to="/signin"
             className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
           >
-            Sign In
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>
