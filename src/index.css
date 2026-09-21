@@ -1,0 +1,305 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #FFFFFF;
+    color: #111827;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  html.dark, html.dark body {
+    background-color: #0F172A;
+    color: #F8FAFC;
+  }
+
+  /* Safe area helpers */
+  .safe-top-padding {
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  }
+
+  .safe-bottom-padding {
+    padding-bottom: max(1.25rem, calc(1rem + env(safe-area-inset-bottom, 0px)));
+  }
+
+  /* Clean subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+/* ===================================================================
+   HUMAN-MADE INTERACTIVE DESIGN SYSTEM: CONSISTENT 180ms TIMING
+   =================================================================== */
+
+/* 1. BUTTON HOVER & CLICK FEEDBACK */
+button,
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+.interactive-btn {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+  will-change: transform, box-shadow;
+}
+
+button:focus-visible,
+input[type='button']:focus-visible,
+input[type='submit']:focus-visible,
+input[type='reset']:focus-visible,
+.interactive-btn:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.7);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(:disabled),
+  input[type='button']:hover:not(:disabled),
+  input[type='submit']:hover:not(:disabled),
+  input[type='reset']:hover:not(:disabled),
+  .interactive-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px -2px rgba(17, 24, 39, 0.08), 0 2px 4px -2px rgba(17, 24, 39, 0.04);
+  }
+  html.dark button:hover:not(:disabled),
+  html.dark input[type='button']:hover:not(:disabled),
+  html.dark input[type='submit']:hover:not(:disabled),
+  html.dark input[type='reset']:hover:not(:disabled),
+  html.dark .interactive-btn:hover:not(:disabled) {
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+button:active:not(:disabled),
+input[type='button']:active:not(:disabled),
+input[type='submit']:active:not(:disabled),
+input[type='reset']:active:not(:disabled),
+.interactive-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  transition-duration: 75ms;
+}
+
+/* 2. CATEGORY / OCCUPATION CARDS */
+.category-card-interactive {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 250ms ease,
+    color 250ms ease;
+  will-change: transform, box-shadow, border-color;
+}
+
+html.dark .category-card-interactive {
+  background-color: #1E293B;
+  border: 1px solid #334155;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .category-card-interactive:hover {
+    transform: translateY(-4px);
+    border-color: #93C5FD;
+    box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  }
+  html.dark .category-card-interactive:hover {
+    border-color: #60A5FA;
+    box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(96, 165, 250, 0.15);
+  }
+}
+
+.category-card-interactive:active {
+  transform: translateY(1px);
+  transition-duration: 75ms;
+}
+
+/* 3. SKILL CARDS */
+.skill-card-interactive {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 250ms ease,
+    color 250ms ease;
+  will-change: transform, box-shadow, border-color;
+}
+
+html.dark .skill-card-interactive {
+  background-color: #1E293B;
+  border: 1px solid #334155;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .skill-card-interactive:hover {
+    transform: translateY(-3px);
+    border-color: #93C5FD;
+    box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  }
+  html.dark .skill-card-interactive:hover {
+    border-color: #60A5FA;
+    box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(96, 165, 250, 0.15);
+  }
+}
+
+.skill-card-interactive:active {
+  transform: translateY(1px);
+  transition-duration: 75ms;
+}
+
+/* 4. NAVIGATION LINKS (Smooth color change, no layout shift) */
+.nav-link-interactive {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link-interactive:hover {
+    color: #2563EB;
+  }
+  html.dark .nav-link-interactive:hover {
+    color: #60A5FA;
+  }
+}
+
+/* Subtle background accent grid */
+.subtle-dot-grid {
+  background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+html.dark .subtle-dot-grid {
+  background-image: radial-gradient(#334155 1px, transparent 1px);
+}
+
+/* Global smooth transition for surfaces, borders, and text */
+.theme-transition {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 250ms;
+}
+
+/* Subtle Fade and Slide Transitions */
+@keyframes enter-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes enter-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enter-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enter-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: enter-fade 0.2s ease-out forwards;
+}
+
+.animate-fade-up {
+  animation: enter-fade-up 0.25s ease-out forwards;
+}
+
+.animate-fade-down {
+  animation: enter-fade-down 0.25s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: enter-scale-in 0.2s ease-out forwards;
+}
+
+/* 7. ACCESSIBILITY / PREFERS-REDUCED-MOTION */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:hover:not(:disabled),
+  button:active:not(:disabled),
+  input[type='button']:hover:not(:disabled),
+  input[type='button']:active:not(:disabled),
+  input[type='submit']:hover:not(:disabled),
+  input[type='submit']:active:not(:disabled),
+  input[type='reset']:hover:not(:disabled),
+  input[type='reset']:active:not(:disabled),
+  .interactive-btn:hover:not(:disabled),
+  .interactive-btn:active:not(:disabled),
+  .category-card-interactive:hover,
+  .category-card-interactive:active,
+  .skill-card-interactive:hover,
+  .skill-card-interactive:active {
+    transform: none !important;
+  }
+}
