@@ -5,13 +5,11 @@ import { Header } from '../components/Header';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { ScoreCard } from '../components/ScoreCard';
 import { CategoryCard } from '../components/CategoryCard';
-import { SkillCard } from '../components/SkillCard';
 import { Button } from '../components/Button';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { CATEGORIES, SKILLS } from '../data/mockData';
 import { getLocalizedSkill } from '../data/localizedContent';
-import { storageService } from '../services/storage';
 import { PageTransition } from '../components/PageTransition';
 
 export const Home: React.FC = () => {
@@ -30,16 +28,13 @@ export const Home: React.FC = () => {
       ? t('home.greetingDay', { name: userName })
       : t('home.greetingEvening', { name: userName });
 
-  // Recommended skills: 4 flagship drills
-  const rawRecommended = SKILLS.filter((s) => s.flagship).slice(0, 4);
-
   // Latest session feedback
   const latestSession = sessions[0] || null;
 
-  // Last practiced skill or fallback to Roller Painting
+  // Last practiced skill or fallback to the first flagship skill for active learning
   const rawContinue = latestSession
-    ? SKILLS.find((s) => s.id === latestSession.skillId) || rawRecommended[0]
-    : rawRecommended[0];
+    ? SKILLS.find((s) => s.id === latestSession.skillId) || SKILLS[0]
+    : SKILLS[0];
 
   const continueSkill = rawContinue ? getLocalizedSkill(rawContinue, language) : null;
 
@@ -90,7 +85,7 @@ export const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* Primary CTA: Continue Learning Section */}
+        {/* Primary CTA: Continue Learning & Form Readiness */}
         {continueSkill && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             <div className="lg:col-span-7 bg-blue-50/60 dark:bg-slate-800/80 border border-blue-100 dark:border-slate-700 rounded-2xl p-6 flex flex-col justify-between shadow-xs">
@@ -175,40 +170,7 @@ export const Home: React.FC = () => {
           </div>
         )}
 
-        {/* Section: Recommended Drills */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                {t('home.recommendedSkills')}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t('home.recommendedSubtitle')}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/skills')}
-              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-            >
-              <span>{t('home.viewAll')}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {rawRecommended.map((skill) => (
-              <SkillCard
-                key={skill.id}
-                skill={skill}
-                bestScore={storageService.getBestScoreForSkill(skill.id)}
-                onClick={() => navigate(`/skills/${skill.id}`)}
-                onPractice={() => navigate(`/practice/${skill.id}`)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Section: Explore Skills (Categories List/Grid) */}
+        {/* Section: Explore by Category (Discipline cards linking to /skills?category=...) */}
         <div className="pb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -221,9 +183,10 @@ export const Home: React.FC = () => {
             </div>
             <button
               onClick={() => navigate('/skills')}
-              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
             >
-              {t('skills.allCategories')}
+              <span>{t('skills.title')}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
